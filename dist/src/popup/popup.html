@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SERP Capture</title>
+    <script type="module" crossorigin src="/assets/popup.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/validation.js">
+    <link rel="stylesheet" crossorigin href="/assets/popup.css">
+  </head>
+  <body>
+    <main class="popup">
+      <h1>SERP Capture</h1>
+
+      <label class="field">
+        <span>Keywords</span>
+        <textarea id="keywords" rows="8" placeholder="workstation que es&#10;estacion de trabajo pc que es&#10;gaming workstation"></textarea>
+      </label>
+
+      <label class="field compact">
+        <span>Resultados por keyword</span>
+        <input id="resultCount" type="number" min="1" max="10" value="5" />
+      </label>
+
+      <div class="actions">
+        <button id="startButton" type="button">Iniciar captura</button>
+        <button id="cancelButton" type="button" class="secondary" hidden>Cancelar</button>
+      </div>
+
+      <section class="status" aria-live="polite">
+        <p><strong>Estado:</strong> <span id="statusText">Inactivo</span></p>
+        <p><strong>Keyword:</strong> <span id="currentKeyword">-</span></p>
+        <p><strong>Progreso:</strong> <span id="progressText">0 de 0</span></p>
+      </section>
+
+      <div id="messages" class="messages"></div>
+
+      <section id="summary" class="summary" hidden>
+        <h2>Resumen</h2>
+        <p id="summaryText"></p>
+        <button id="downloadAgainButton" type="button" class="secondary" hidden>Descargar ultimo JSON</button>
+      </section>
+    </main>
+  </body>
+</html>
