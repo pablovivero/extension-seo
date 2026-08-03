@@ -1,5 +1,7 @@
 import type { BackgroundRequest, BackgroundResponse, CaptureState, ExtractResponse, SerpCapture, SerpQuery } from "../shared/types";
+import { JOB_POLL_ALARM_NAME, pollForRedactorJob, readPairingSecretFromStorage, scheduleJobPolling } from "./job-polling";
 import { sendCaptureToRedactor } from "../shared/redactor-client";
+import { PAIRING_SECRET_KEY } from "../shared/pairing";
 import { buildGoogleSearchUrl, toSafeTimestampForFilename } from "../shared/validation";
 
 const LOCALE = "es-ES";
@@ -12,11 +14,28 @@ let state: CaptureState = createIdleState();
 let activeTabId: number | null = null;
 
 chrome.runtime.onInstalled.addListener(() => {
+  scheduleJobPolling();
   void persistState();
+  void checkForRedactorJob();
 });
 
 chrome.runtime.onStartup.addListener(() => {
   void restoreState();
+  scheduleJobPolling();
+  void checkForRedactorJob();
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === JOB_POLL_ALARM_NAME) {
+    void checkForRedactorJob();
+  }
+});
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  const newSecret = changes[PAIRING_SECRET_KEY]?.newValue;
+  if (areaName === "local" && typeof newSecret === "string" && newSecret.trim()) {
+    void checkForRedactorJob();
+  }
 });
 
 chrome.runtime.onMessage.addListener((request: BackgroundRequest, _sender, sendResponse: (response: BackgroundResponse) => void) => {
@@ -68,7 +87,23 @@ async function handleMessage(request: BackgroundRequest): Promise<BackgroundResp
   }
 }
 
-async function runCapture(keywords: string[], requestedResultCount: number): Promise<void> {
+async function checkForRedactorJob(): Promise<void> {
+  await pollForRedactorJob({
+    getPairingSecret: readPairingSecret,
+    getCaptureState: async () => {
+      await restoreState();
+      return state;
+    },
+    runCapture,
+    sendCapture: sendCaptureToRedactor
+  });
+}
+
+async function readPairingSecret(): Promise<string | null> {
+  return readPairingSecretFromStorage();
+}
+
+async function runCapture(keywords: string[], requestedResultCount: number): Promise<SerpCapture | null> {
   const capturedAt = new Date().toISOString();
   state = {
     status: "running",
@@ -132,7 +167,11 @@ async function runCapture(keywords: string[], requestedResultCount: number): Pro
     const message = error instanceof Error ? error.message : "Error desconocido durante la captura.";
     state = { ...state, status: "error", lastError: message, currentKeyword: null };
     await persistState();
+  } finally {
+    await closeActiveTab();
   }
+
+  return state.status === "completed" ? state.capture : null;
 }
 
 async function captureKeyword(keyword: string, requestedResultCount: number): Promise<SerpQuery> {

@@ -1,8 +1,7 @@
 import type { BackgroundRequest, BackgroundResponse, CaptureState } from "../shared/types";
 import { REDACTOR_MESSAGES } from "../shared/redactor-client";
+import { PAIRING_SECRET_KEY } from "../shared/pairing";
 import { DEFAULT_RESULT_COUNT, MAX_RESULT_COUNT, validateCaptureInput } from "../shared/validation";
-
-const PAIRING_SECRET_KEY = "redactorPairingSecret";
 
 const keywordsInput = getElement<HTMLTextAreaElement>("keywords");
 const resultCountInput = getElement<HTMLInputElement>("resultCount");

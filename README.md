@@ -57,13 +57,13 @@ Primera vez:
 Día a día:
 
 1. Ejecuta `npm run generar` en el CLI y déjalo esperando la captura.
-2. Captura las keywords desde la extensión.
-3. Al terminar, pulsa `Enviar al redactor`.
-4. Si prefieres trabajar con archivo, usa `Descargar último JSON`; ese flujo no cambia.
+2. Con Chrome abierto y la extensión ya emparejada, no hace falta abrir el popup: el background comprueba `GET /job`, lanza la captura pendiente y envía el JSON al redactor automáticamente.
+3. Chrome ejecuta esta comprobación con `chrome.alarms`. En extensiones normales el intervalo mínimo práctico es de aproximadamente 1 minuto, así que puede tardar hasta ~1 minuto en arrancar tras enviar el brief desde el CLI. Al guardar un emparejamiento nuevo, la extensión hace una comprobación inmediata.
+4. El popup sigue siendo una alternativa manual: puedes pulsar `Iniciar captura`, `Enviar al redactor` o `Descargar último JSON` como antes.
 
 Para reemparejar, pulsa `Olvidar emparejamiento` en el popup y pega el nuevo código del CLI. Esto es coherente con `npm run redactor:pairing:reset` en el repo del CLI.
 
-La extensión envía a `http://127.0.0.1:43187/serp`, el puerto por defecto del CLI. El permiso de host se declara como `http://127.0.0.1/*` para cubrir el servidor local si el CLI cambia de puerto con `REDACTOR_LOCAL_PORT`; la URL de envío de la extensión usa el puerto por defecto y tendría que ajustarse si se configura otro puerto en el CLI.
+La extensión consulta jobs en `http://127.0.0.1:43187/job` y envía capturas a `http://127.0.0.1:43187/serp`, el puerto por defecto del CLI. El permiso de host se declara como `http://127.0.0.1/*` para cubrir el servidor local si el CLI cambia de puerto con `REDACTOR_LOCAL_PORT`; las URLs de la extensión usan el puerto por defecto y tendrían que ajustarse si se configura otro puerto en el CLI.
 
 ## Contrato JSON
 

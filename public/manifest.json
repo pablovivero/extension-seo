@@ -10,6 +10,6 @@
     "service_worker": "assets/service-worker.js",
     "type": "module"
   },
-  "permissions": ["tabs", "scripting", "downloads", "storage"],
+  "permissions": ["tabs", "scripting", "downloads", "storage", "alarms"],
   "host_permissions": ["https://www.google.com/*", "https://www.google.es/*", "http://127.0.0.1/*"]
 }
