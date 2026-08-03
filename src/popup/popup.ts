@@ -1,5 +1,8 @@
 import type { BackgroundRequest, BackgroundResponse, CaptureState } from "../shared/types";
+import { REDACTOR_MESSAGES } from "../shared/redactor-client";
 import { DEFAULT_RESULT_COUNT, MAX_RESULT_COUNT, validateCaptureInput } from "../shared/validation";
+
+const PAIRING_SECRET_KEY = "redactorPairingSecret";
 
 const keywordsInput = getElement<HTMLTextAreaElement>("keywords");
 const resultCountInput = getElement<HTMLInputElement>("resultCount");
@@ -11,9 +14,15 @@ const progressText = getElement<HTMLSpanElement>("progressText");
 const messages = getElement<HTMLDivElement>("messages");
 const summary = getElement<HTMLElement>("summary");
 const summaryText = getElement<HTMLParagraphElement>("summaryText");
+const pairingSecretInput = getElement<HTMLInputElement>("pairingSecret");
+const savePairingButton = getElement<HTMLButtonElement>("savePairingButton");
+const forgetPairingButton = getElement<HTMLButtonElement>("forgetPairingButton");
+const pairingStatus = getElement<HTMLParagraphElement>("pairingStatus");
+const sendToRedactorButton = getElement<HTMLButtonElement>("sendToRedactorButton");
 const downloadAgainButton = getElement<HTMLButtonElement>("downloadAgainButton");
 
 let pollTimer: number | null = null;
+let pairingSecret: string | null = null;
 
 resultCountInput.value = String(DEFAULT_RESULT_COUNT);
 resultCountInput.max = String(MAX_RESULT_COUNT);
@@ -34,7 +43,24 @@ downloadAgainButton.addEventListener("click", () => {
   });
 });
 
-void refreshState();
+savePairingButton.addEventListener("click", () => {
+  void savePairingSecret();
+});
+
+forgetPairingButton.addEventListener("click", () => {
+  void forgetPairingSecret();
+});
+
+sendToRedactorButton.addEventListener("click", () => {
+  void sendLastResultToRedactor();
+});
+
+void initializePopup();
+
+async function initializePopup(): Promise<void> {
+  await restorePairingSecret();
+  await refreshState();
+}
 
 async function startCapture(): Promise<void> {
   clearMessages();
@@ -79,12 +105,12 @@ function stopPollingIfFinished(state: CaptureState): void {
 }
 
 function renderResponse(response: BackgroundResponse): void {
-  if (!response.ok && response.error) {
-    renderMessages([response.error], "error");
-  }
-
   if (response.state) {
     renderState(response.state);
+  }
+
+  if (!response.ok && response.error) {
+    renderMessages([response.error], "error");
   }
 }
 
@@ -109,6 +135,7 @@ function renderState(state: CaptureState): void {
   const totalResults = state.capture?.queries.reduce((sum, query) => sum + query.results.length, 0) ?? 0;
   summary.hidden = state.status === "idle" || state.status === "running";
   summaryText.textContent = `${completedQueries} keywords procesadas, ${totalResults} resultados capturados.`;
+  sendToRedactorButton.hidden = !state.capture;
   downloadAgainButton.hidden = !state.canDownloadAgain;
   stopPollingIfFinished(state);
 }
@@ -128,7 +155,70 @@ function getStatusLabel(status: CaptureState["status"]): string {
   }
 }
 
-function renderMessages(items: string[], type: "error" | "warning"): void {
+async function restorePairingSecret(): Promise<void> {
+  const stored = await chrome.storage.local.get(PAIRING_SECRET_KEY);
+  const secret = stored[PAIRING_SECRET_KEY];
+  pairingSecret = typeof secret === "string" && secret.trim() ? secret : null;
+  pairingSecretInput.value = "";
+  renderPairingStatus();
+}
+
+async function savePairingSecret(): Promise<void> {
+  const secret = pairingSecretInput.value.trim();
+  clearMessages();
+
+  if (!secret) {
+    renderMessages([REDACTOR_MESSAGES.missingSecret], "error");
+    return;
+  }
+
+  await chrome.storage.local.set({ [PAIRING_SECRET_KEY]: secret });
+  pairingSecret = secret;
+  pairingSecretInput.value = "";
+  renderPairingStatus("Emparejamiento guardado.");
+}
+
+async function forgetPairingSecret(): Promise<void> {
+  await chrome.storage.local.remove(PAIRING_SECRET_KEY);
+  pairingSecret = null;
+  pairingSecretInput.value = "";
+  renderPairingStatus("Emparejamiento olvidado.");
+  clearMessages();
+}
+
+async function sendLastResultToRedactor(): Promise<void> {
+  clearMessages();
+
+  if (!pairingSecret) {
+    renderMessages([REDACTOR_MESSAGES.missingSecret], "error");
+    return;
+  }
+
+  sendToRedactorButton.disabled = true;
+  let response: BackgroundResponse;
+  try {
+    response = await sendRequest({ type: "SEND_LAST_RESULT_TO_REDACTOR", payload: { secret: pairingSecret } });
+  } catch {
+    renderMessages([REDACTOR_MESSAGES.connectionRefused], "error");
+    sendToRedactorButton.disabled = false;
+    return;
+  }
+  sendToRedactorButton.disabled = false;
+
+  if (response.ok) {
+    renderResponse(response);
+    renderMessages([REDACTOR_MESSAGES.success], "success");
+    return;
+  }
+
+  renderResponse(response);
+}
+
+function renderPairingStatus(message?: string): void {
+  pairingStatus.textContent = message ?? (pairingSecret ? "Emparejado. Puedes enviar capturas al redactor." : "Sin emparejamiento guardado.");
+}
+
+function renderMessages(items: string[], type: "error" | "warning" | "success"): void {
   for (const item of items) {
     const element = document.createElement("p");
     element.className = `message ${type}`;

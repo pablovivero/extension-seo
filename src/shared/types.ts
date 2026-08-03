@@ -56,7 +56,8 @@ export type BackgroundRequest =
   | { type: "START_CAPTURE"; payload: CaptureOptions }
   | { type: "CANCEL_CAPTURE" }
   | { type: "GET_STATE" }
-  | { type: "DOWNLOAD_LAST_RESULT" };
+  | { type: "DOWNLOAD_LAST_RESULT" }
+  | { type: "SEND_LAST_RESULT_TO_REDACTOR"; payload: { secret: string } };
 
 export interface BackgroundResponse {
   ok: boolean;

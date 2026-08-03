@@ -35,10 +35,26 @@
 
       <div id="messages" class="messages"></div>
 
+      <section class="pairing">
+        <h2>Emparejar con redactor-seo</h2>
+        <label class="field">
+          <span>Código del CLI</span>
+          <input id="pairingSecret" type="password" autocomplete="off" placeholder="Pega aquí el código" />
+        </label>
+        <div class="actions pairing-actions">
+          <button id="savePairingButton" type="button" class="secondary">Guardar emparejamiento</button>
+          <button id="forgetPairingButton" type="button" class="secondary">Olvidar emparejamiento</button>
+        </div>
+        <p id="pairingStatus" class="pairing-status"></p>
+      </section>
+
       <section id="summary" class="summary" hidden>
         <h2>Resumen</h2>
         <p id="summaryText"></p>
-        <button id="downloadAgainButton" type="button" class="secondary" hidden>Descargar ultimo JSON</button>
+        <div class="actions">
+          <button id="sendToRedactorButton" type="button" hidden>Enviar al redactor</button>
+          <button id="downloadAgainButton" type="button" class="secondary" hidden>Descargar último JSON</button>
+        </div>
       </section>
     </main>
   </body>

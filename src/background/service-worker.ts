@@ -1,4 +1,5 @@
 import type { BackgroundRequest, BackgroundResponse, CaptureState, ExtractResponse, SerpCapture, SerpQuery } from "../shared/types";
+import { sendCaptureToRedactor } from "../shared/redactor-client";
 import { buildGoogleSearchUrl, toSafeTimestampForFilename } from "../shared/validation";
 
 const LOCALE = "es-ES";
@@ -53,6 +54,17 @@ async function handleMessage(request: BackgroundRequest): Promise<BackgroundResp
       }
       await downloadCapture(state.capture);
       return { ok: true, state };
+    case "SEND_LAST_RESULT_TO_REDACTOR":
+      if (!state.capture) {
+        return { ok: false, error: "No hay un resultado disponible para enviar.", state };
+      }
+      try {
+        await sendCaptureToRedactor(state.capture, request.payload.secret);
+        return { ok: true, state };
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "No se pudo enviar la captura al redactor. Vuelve a intentarlo.";
+        return { ok: false, error: message, state };
+      }
   }
 }
 

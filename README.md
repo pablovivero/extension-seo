@@ -44,6 +44,27 @@ La extension compilada queda en `dist`.
 5. Al finalizar descarga `serp-results-<timestamp>.json`.
 6. Mientras el service worker mantenga el resultado en `chrome.storage.session`, se puede descargar de nuevo desde el popup.
 
+## Enviar al CLI redactor-seo
+
+La descarga manual sigue disponible. Además, la extensión puede enviar la misma captura JSON al CLI local `redactor-seo`.
+
+Primera vez:
+
+1. En el repo del CLI, ejecuta `npm run generar`.
+2. El CLI mostrará un código de emparejamiento la primera vez que cree su archivo local de pairing.
+3. En el popup de la extensión, pega ese código en `Emparejar con redactor-seo` y pulsa `Guardar emparejamiento`.
+
+Día a día:
+
+1. Ejecuta `npm run generar` en el CLI y déjalo esperando la captura.
+2. Captura las keywords desde la extensión.
+3. Al terminar, pulsa `Enviar al redactor`.
+4. Si prefieres trabajar con archivo, usa `Descargar último JSON`; ese flujo no cambia.
+
+Para reemparejar, pulsa `Olvidar emparejamiento` en el popup y pega el nuevo código del CLI. Esto es coherente con `npm run redactor:pairing:reset` en el repo del CLI.
+
+La extensión envía a `http://127.0.0.1:43187/serp`, el puerto por defecto del CLI. El permiso de host se declara como `http://127.0.0.1/*` para cubrir el servidor local si el CLI cambia de puerto con `REDACTOR_LOCAL_PORT`; la URL de envío de la extensión usa el puerto por defecto y tendría que ajustarse si se configura otro puerto en el CLI.
+
 ## Contrato JSON
 
 ```ts

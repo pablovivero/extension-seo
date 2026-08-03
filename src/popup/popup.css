@@ -83,6 +83,7 @@ button:disabled {
 }
 
 .status,
+.pairing,
 .summary {
   border-top: 1px solid #e0e3e7;
   margin-top: 12px;
@@ -90,8 +91,18 @@ button:disabled {
 }
 
 .status p,
+.pairing p,
 .summary p {
   margin: 4px 0;
+}
+
+.pairing-actions {
+  flex-wrap: wrap;
+}
+
+.pairing-status {
+  min-height: 20px;
+  color: #5f6368;
 }
 
 .messages {
@@ -112,4 +123,9 @@ button:disabled {
 .message.warning {
   color: #7a4f00;
   background: #fff4d7;
+}
+
+.message.success {
+  color: #0b6b37;
+  background: #e6f4ea;
 }
