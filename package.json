@@ -1,19 +1,28 @@
 {
   "name": "serp-capture-extension",
   "version": "0.1.0",
-  "private": true,
+  "description": "Chrome Manifest V3 extension for capturing visible organic Google search results as JSON.",
+  "license": "MIT",
+  "private": false,
   "type": "module",
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
+  "keywords": [
+    "chrome-extension",
+    "manifest-v3",
+    "serp",
+    "seo",
+    "typescript"
+  ],
   "devDependencies": {
-    "@types/chrome": "^0.0.268",
-    "@types/node": "^22.5.0",
-    "happy-dom": "^14.12.3",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.2",
-    "vitest": "^2.0.5"
+    "@types/chrome": "^0.2.9",
+    "@types/node": "^26.5.0",
+    "happy-dom": "^20.14.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
   }
 }
