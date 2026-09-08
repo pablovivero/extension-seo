@@ -1,1 +1,1 @@
-export const PAIRING_SECRET_KEY = "redactorPairingSecret";
+export const PAIRING_SECRET_KEY = "localCapturePairingSecret";
