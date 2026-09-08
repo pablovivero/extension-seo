@@ -42,7 +42,7 @@ chrome.runtime.onMessage.addListener((request: BackgroundRequest, _sender, sendR
   void handleMessage(request)
     .then(sendResponse)
     .catch((error: unknown) => {
-      const message = error instanceof Error ? error.message : "Error desconocido.";
+      const message = error instanceof Error ? error.message : "Unknown error.";
       state = { ...state, status: "error", lastError: message };
       void persistState();
       sendResponse({ ok: false, error: message, state });
@@ -57,7 +57,7 @@ async function handleMessage(request: BackgroundRequest): Promise<BackgroundResp
   switch (request.type) {
     case "START_CAPTURE":
       if (state.status === "running") {
-        return { ok: false, error: "Ya hay una captura en curso.", state };
+        return { ok: false, error: "A capture is already running.", state };
       }
       void runCapture(request.payload.keywords, request.payload.requestedResultCount);
       return { ok: true, state };
@@ -69,19 +69,19 @@ async function handleMessage(request: BackgroundRequest): Promise<BackgroundResp
       return { ok: true, state };
     case "DOWNLOAD_LAST_RESULT":
       if (!state.capture) {
-        return { ok: false, error: "No hay un resultado disponible para descargar.", state };
+        return { ok: false, error: "There is no captured result to download.", state };
       }
       await downloadCapture(state.capture);
       return { ok: true, state };
     case "SEND_LAST_RESULT_TO_REDACTOR":
       if (!state.capture) {
-        return { ok: false, error: "No hay un resultado disponible para enviar.", state };
+        return { ok: false, error: "There is no captured result to send.", state };
       }
       try {
         await sendCaptureToRedactor(state.capture, request.payload.secret);
         return { ok: true, state };
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "No se pudo enviar la captura al redactor. Vuelve a intentarlo.";
+        const message = error instanceof Error ? error.message : "The capture could not be sent to the local receiver. Try again.";
         return { ok: false, error: message, state };
       }
   }
@@ -164,7 +164,7 @@ async function runCapture(keywords: string[], requestedResultCount: number): Pro
       await closeActiveTab();
     }
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Error desconocido durante la captura.";
+    const message = error instanceof Error ? error.message : "Unknown error during capture.";
     state = { ...state, status: "error", lastError: message, currentKeyword: null };
     await persistState();
   } finally {
@@ -202,7 +202,7 @@ async function captureKeyword(keyword: string, requestedResultCount: number): Pr
       warnings: response.warnings
     };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "No se pudo capturar esta keyword.";
+    const message = error instanceof Error ? error.message : "This keyword could not be captured.";
     warnings.push(message);
     return {
       keyword,
@@ -218,7 +218,7 @@ async function captureKeyword(keyword: string, requestedResultCount: number): Pr
 async function createOrReuseTab(): Promise<number> {
   const tab = await chrome.tabs.create({ url: "about:blank", active: true });
   if (tab.id === undefined) {
-    throw new Error("Chrome no devolvio un id para la pestana temporal.");
+    throw new Error("Chrome did not return an id for the temporary tab.");
   }
   return tab.id;
 }
@@ -231,10 +231,10 @@ function waitForTabComplete(tabId: number, timeoutMs: number): Promise<void> {
   return new Promise((resolve, reject) => {
     const timeout = globalThis.setTimeout(() => {
       chrome.tabs.onUpdated.removeListener(listener);
-      reject(new Error("Tiempo de espera agotado al cargar la pagina de Google."));
+      reject(new Error("Timed out while loading the Google results page."));
     }, timeoutMs);
 
-    const listener = (updatedTabId: number, changeInfo: chrome.tabs.TabChangeInfo): void => {
+    const listener = (updatedTabId: number, changeInfo: chrome.tabs.OnUpdatedInfo): void => {
       if (updatedTabId === tabId && changeInfo.status === "complete") {
         globalThis.clearTimeout(timeout);
         chrome.tabs.onUpdated.removeListener(listener);
@@ -249,7 +249,7 @@ function waitForTabComplete(tabId: number, timeoutMs: number): Promise<void> {
 async function sendExtractRequest(tabId: number, requestedResultCount: number): Promise<ExtractResponse> {
   const response: unknown = await chrome.tabs.sendMessage(tabId, { requestedResultCount });
   if (!isExtractResponse(response)) {
-    throw new Error("El content script no devolvio una respuesta valida.");
+    throw new Error("The content script did not return a valid response.");
   }
   return response;
 }
