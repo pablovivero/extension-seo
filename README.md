@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="#install">Install</a> &bull; <a href="#how-it-works">How it works</a> &bull; <a href="#stack">Stack</a> &bull; <a href="#optional-local-receiver">Local receiver</a> &bull; <a href="#contributing">Contributing</a>
+  <a href="#install">Install</a> &bull; <a href="#how-it-works">How it works</a> &bull; <a href="#stack">Stack</a> &bull; <a href="#optional-local-receiver">Local receiver</a>
 </p>
 
 > A Chrome extension for capturing the organic Google results you can already see, turning them into structured JSON, and keeping the whole workflow under your control.
@@ -198,9 +198,9 @@ It also includes a fallback path based on visible `h3` headings when the common 
 - No remote telemetry or analytics is included.
 - See [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
-## Contributing
+## Maintenance
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+This project is maintained by its owner. The source is public for installation, inspection, and personal use.
 
 ## License
 
