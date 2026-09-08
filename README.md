@@ -1,23 +1,33 @@
 # SERP Capture Extension
 
-Extension independiente de Chrome Manifest V3 para automatizar busquedas en Google desde una lista de keywords, capturar resultados organicos visibles y descargar un unico JSON reutilizable por otro proyecto.
+SERP Capture is a Chrome Manifest V3 extension that captures visible organic Google Search results for a list of keywords and exports a structured JSON file.
 
-## Limitaciones
+It is designed for local, user-controlled SEO workflows: the extension opens Google in a visible browser tab, reads the loaded results page, and stores the capture locally. It does not use a remote backend, scraping proxy, analytics service, or third-party scraping API.
 
-- Captura solo resultados organicos visibles que contengan un enlace HTTP/HTTPS y un titulo visible.
-- No captura anuncios, AI Overview, People Also Ask, featured snippets, videos, local pack ni paginacion.
-- No raspa las paginas de destino.
-- No usa backend, base de datos, proxies, servicios externos ni APIs de scraping.
-- Google cambia el DOM con frecuencia; los selectores y heuristicas pueden requerir mantenimiento.
-- Si aparece consentimiento o CAPTCHA, la extension no lo acepta ni lo resuelve. La pestaña queda visible para intervencion humana.
+## Features
 
-## Instalacion
+- Capture organic results visible on Google Search result pages.
+- Export captures as JSON.
+- Keep the latest capture temporarily available for another download.
+- Optionally send captures to a local receiver through a simple authenticated local HTTP API.
+- Poll a local receiver for pending capture jobs with Chrome alarms.
+- Detect common consent, CAPTCHA, unusual-traffic, no-result, and error states without trying to bypass them.
+
+## Limitations
+
+- Captures only visible organic results with an HTTP/HTTPS link and visible title.
+- Does not capture ads, AI Overview, People Also Ask, featured snippets, videos, local packs, or paginated results.
+- Does not scrape destination pages.
+- Does not accept consent screens, solve CAPTCHA, or evade Google protections.
+- Google changes its DOM often, so selectors and heuristics may need maintenance.
+
+## Install
 
 ```bash
 npm install
 ```
 
-## Build
+## Build And Test
 
 ```bash
 npm run typecheck
@@ -25,47 +35,73 @@ npm test
 npm run build
 ```
 
-La extension compilada queda en `dist`.
+The compiled extension is generated in `dist`.
 
-## Carga en Chrome
+## Load In Chrome
 
-1. Abrir `chrome://extensions`.
-2. Activar el modo desarrollador.
-3. Elegir `Cargar descomprimida`.
-4. Seleccionar la carpeta `dist`.
-5. Abrir el popup de `SERP Capture`.
+1. Open `chrome://extensions`.
+2. Enable Developer mode.
+3. Choose `Load unpacked`.
+4. Select the generated `dist` directory.
+5. Open the `SERP Capture` popup.
 
-## Uso
+## Basic Usage
 
-1. Introducir keywords, una por linea.
-2. Elegir resultados por keyword, entre 1 y 10. El valor inicial es 5.
-3. Pulsar `Iniciar captura`.
-4. La extension abre una pestaña temporal de Google y procesa una keyword cada vez.
-5. Al finalizar descarga `serp-results-<timestamp>.json`.
-6. Mientras el service worker mantenga el resultado en `chrome.storage.session`, se puede descargar de nuevo desde el popup.
+1. Enter one keyword per line.
+2. Choose a result count per keyword, from 1 to 10.
+3. Click `Start capture`.
+4. The extension opens a temporary Google tab and processes one keyword at a time.
+5. When the run finishes, it downloads `serp-results-<timestamp>.json`.
+6. While the service worker keeps the result in `chrome.storage.session`, it can be downloaded again from the popup.
 
-## Enviar al CLI redactor-seo
+## Optional Local Receiver
 
-La descarga manual sigue disponible. Además, la extensión puede enviar la misma captura JSON al CLI local `redactor-seo`.
+The extension can send the same capture JSON to a local HTTP receiver. This is useful when pairing the browser extension with a local CLI or desktop workflow.
 
-Primera vez:
+By default the extension uses:
 
-1. En el repo del CLI, ejecuta `npm run generar`.
-2. El CLI mostrará un código de emparejamiento la primera vez que cree su archivo local de pairing.
-3. En el popup de la extensión, pega ese código en `Emparejar con redactor-seo` y pulsa `Guardar emparejamiento`.
+- `GET http://127.0.0.1:43187/job` to ask for a pending capture job.
+- `POST http://127.0.0.1:43187/serp` to send the completed capture.
 
-Día a día:
+The local receiver is expected to use a bearer token shared through a pairing code. The extension stores that pairing code in `chrome.storage.local` on the user's machine.
 
-1. Ejecuta `npm run generar` en el CLI y déjalo esperando la captura.
-2. Con Chrome abierto y la extensión ya emparejada, no hace falta abrir el popup: el background comprueba `GET /job`, lanza la captura pendiente y envía el JSON al redactor automáticamente.
-3. Chrome ejecuta esta comprobación con `chrome.alarms`. En extensiones normales el intervalo mínimo práctico es de aproximadamente 1 minuto, así que puede tardar hasta ~1 minuto en arrancar tras enviar el brief desde el CLI. Al guardar un emparejamiento nuevo, la extensión hace una comprobación inmediata.
-4. El popup sigue siendo una alternativa manual: puedes pulsar `Iniciar captura`, `Enviar al redactor` o `Descargar último JSON` como antes.
+### Configure The Endpoint
 
-Para reemparejar, pulsa `Olvidar emparejamiento` en el popup y pega el nuevo código del CLI. Esto es coherente con `npm run redactor:pairing:reset` en el repo del CLI.
+The default local API origin can be changed at build time:
 
-La extensión consulta jobs en `http://127.0.0.1:43187/job` y envía capturas a `http://127.0.0.1:43187/serp`, el puerto por defecto del CLI. El permiso de host se declara como `http://127.0.0.1/*` para cubrir el servidor local si el CLI cambia de puerto con `REDACTOR_LOCAL_PORT`; las URLs de la extensión usan el puerto por defecto y tendrían que ajustarse si se configura otro puerto en el CLI.
+```bash
+VITE_LOCAL_CAPTURE_ENDPOINT=http://127.0.0.1:43187 npm run build
+```
 
-## Contrato JSON
+Only local hosts are declared in the extension manifest:
+
+- `http://127.0.0.1/*`
+- `http://localhost/*`
+
+### Local API Contract
+
+Pending job response:
+
+```json
+{
+  "keywords": ["technical seo checklist", "best ergonomic keyboard"],
+  "requestedResultCount": 5
+}
+```
+
+When there is no pending job, the receiver should return `204 No Content`.
+
+Capture submission:
+
+```http
+POST /serp
+Authorization: Bearer <pairing-code>
+Content-Type: application/json
+```
+
+The receiver should return `204 No Content` when it accepts the capture and `401 Unauthorized` when the pairing code is invalid.
+
+## Capture JSON Contract
 
 ```ts
 interface SerpCapture {
@@ -95,33 +131,31 @@ interface SerpResult {
 }
 ```
 
-## Estrategia de captura
+## Capture Strategy
 
-El content script analiza el DOM ya cargado en Google. Busca bloques habituales de resultados (`div.g`, `div.MjjYud` y contenedores relacionados), exige un `h3` visible dentro de un enlace, normaliza URLs, calcula dominio con `new URL` y asigna posiciones consecutivas solo a resultados validos.
+The content script analyzes the DOM already loaded in Google. It looks for common result containers such as `div.g`, `div.MjjYud`, and related containers, requires a visible `h3` inside a link, normalizes URLs, calculates the domain with `new URL`, and assigns consecutive positions only to valid organic results.
 
-Tambien aplica una ruta de respaldo basada en encabezados `h3` visibles cuando los contenedores habituales no aparecen.
+It also includes a fallback path based on visible `h3` headings when the common containers are not present.
 
-## Bloques excluidos
+## Excluded Blocks
 
-- Anuncios o bloques con marcas visibles de anuncio/patrocinado.
-- URLs internas de Google como busqueda, preferencias, cache, herramientas, redirecciones internas sin destino valido, maps o shopping.
-- Enlaces no HTTP/HTTPS.
-- Resultados duplicados dentro de la misma keyword.
-- Bloques sin titulo visible o sin URL valida.
+- Ads or blocks marked as sponsored.
+- Google internal URLs such as search, preferences, cache, tools, maps, shopping, and internal redirects without a valid destination.
+- Non-HTTP/HTTPS links.
+- Duplicate URLs within the same keyword.
+- Blocks without a visible title or valid URL.
 
-## CAPTCHA, consentimiento y errores
+## Security And Privacy Notes
 
-La extension detecta textos y estructuras comunes de consentimiento, CAPTCHA, paginas de error y ausencia de resultados. En esos casos registra advertencias en la keyword y continua con la siguiente cuando tiene sentido. No intenta evadir protecciones ni aceptar terminos automaticamente.
+- Captured keywords and SERP results may contain sensitive business research. Treat exported JSON files accordingly.
+- Pairing codes are stored locally in Chrome extension storage; they are never committed to the repository.
+- No remote telemetry or analytics is included.
+- See [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
-## Comprobacion manual sugerida
+## Contributing
 
-- Una keyword devuelve resultados.
-- Varias keywords se procesan en orden.
-- Los resultados tienen titulo, URL, dominio y posicion.
-- El limite solicitado se respeta.
-- No aparecen anuncios como organicos.
-- El archivo JSON se descarga.
-- Una busqueda sin resultados no rompe toda la ejecucion.
-- Cerrar el popup no destruye el proceso mientras el service worker sigue activo.
-- Cancelar detiene las siguientes busquedas.
-- El JSON cumple el contrato documentado.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+MIT

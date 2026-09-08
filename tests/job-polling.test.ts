@@ -60,7 +60,7 @@ describe("job polling", () => {
       fetchJob
     });
 
-    expect(storageArea.get).toHaveBeenCalledWith("redactorPairingSecret");
+    expect(storageArea.get).toHaveBeenCalledWith("localCapturePairingSecret");
     expect(fetchJob).not.toHaveBeenCalled();
     expect(runCapture).not.toHaveBeenCalled();
   });

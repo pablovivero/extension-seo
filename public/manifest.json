@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "SERP Capture",
   "version": "0.1.0",
-  "description": "Captura resultados organicos visibles de Google para una lista de keywords y descarga un JSON.",
+  "description": "Capture visible organic Google results for a keyword list and export them as JSON.",
   "action": {
     "default_popup": "src/popup/popup.html"
   },
@@ -11,5 +11,5 @@
     "type": "module"
   },
   "permissions": ["tabs", "scripting", "downloads", "storage", "alarms"],
-  "host_permissions": ["https://www.google.com/*", "https://www.google.es/*", "http://127.0.0.1/*"]
+  "host_permissions": ["https://www.google.com/*", "https://www.google.es/*", "http://127.0.0.1/*", "http://localhost/*"]
 }

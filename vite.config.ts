@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import { resolve } from "node:path";
 
 export default defineConfig({
@@ -8,9 +8,9 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, "src/popup/popup.html"),
-        "service-worker": resolve(__dirname, "src/background/service-worker.ts"),
-        "extract-serp": resolve(__dirname, "src/content/extract-serp.ts")
+        popup: resolve(import.meta.dirname, "src/popup/popup.html"),
+        "service-worker": resolve(import.meta.dirname, "src/background/service-worker.ts"),
+        "extract-serp": resolve(import.meta.dirname, "src/content/extract-serp.ts")
       },
       output: {
         entryFileNames: "assets/[name].js",

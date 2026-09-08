@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,46 +12,46 @@
 
       <label class="field">
         <span>Keywords</span>
-        <textarea id="keywords" rows="8" placeholder="workstation que es&#10;estacion de trabajo pc que es&#10;gaming workstation"></textarea>
+        <textarea id="keywords" rows="8" placeholder="what is a workstation&#10;best ergonomic keyboard&#10;technical seo checklist"></textarea>
       </label>
 
       <label class="field compact">
-        <span>Resultados por keyword</span>
+        <span>Results per keyword</span>
         <input id="resultCount" type="number" min="1" max="10" value="5" />
       </label>
 
       <div class="actions">
-        <button id="startButton" type="button">Iniciar captura</button>
-        <button id="cancelButton" type="button" class="secondary" hidden>Cancelar</button>
+        <button id="startButton" type="button">Start capture</button>
+        <button id="cancelButton" type="button" class="secondary" hidden>Cancel</button>
       </div>
 
       <section class="status" aria-live="polite">
-        <p><strong>Estado:</strong> <span id="statusText">Inactivo</span></p>
+        <p><strong>Status:</strong> <span id="statusText">Idle</span></p>
         <p><strong>Keyword:</strong> <span id="currentKeyword">-</span></p>
-        <p><strong>Progreso:</strong> <span id="progressText">0 de 0</span></p>
+        <p><strong>Progress:</strong> <span id="progressText">0 of 0</span></p>
       </section>
 
       <div id="messages" class="messages"></div>
 
       <section class="pairing">
-        <h2>Emparejar con redactor-seo</h2>
+        <h2>Local receiver</h2>
         <label class="field">
-          <span>Código del CLI</span>
-          <input id="pairingSecret" type="password" autocomplete="off" placeholder="Pega aquí el código" />
+          <span>Pairing code</span>
+          <input id="pairingSecret" type="password" autocomplete="off" placeholder="Paste the local pairing code" />
         </label>
         <div class="actions pairing-actions">
-          <button id="savePairingButton" type="button" class="secondary">Guardar emparejamiento</button>
-          <button id="forgetPairingButton" type="button" class="secondary">Olvidar emparejamiento</button>
+          <button id="savePairingButton" type="button" class="secondary">Save pairing</button>
+          <button id="forgetPairingButton" type="button" class="secondary">Forget pairing</button>
         </div>
         <p id="pairingStatus" class="pairing-status"></p>
       </section>
 
       <section id="summary" class="summary" hidden>
-        <h2>Resumen</h2>
+        <h2>Summary</h2>
         <p id="summaryText"></p>
         <div class="actions">
-          <button id="sendToRedactorButton" type="button" hidden>Enviar al redactor</button>
-          <button id="downloadAgainButton" type="button" class="secondary" hidden>Descargar último JSON</button>
+          <button id="sendToRedactorButton" type="button" hidden>Send to local receiver</button>
+          <button id="downloadAgainButton" type="button" class="secondary" hidden>Download latest JSON</button>
         </div>
       </section>
     </main>
