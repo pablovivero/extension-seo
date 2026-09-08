@@ -1,8 +1,54 @@
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0F766E,100:2563EB&height=170&section=header&text=SERP%20Capture&fontSize=52&fontColor=FFFFFF&animation=fadeIn&fontAlignY=34&desc=Local-first%20Google%20SERP%20capture%20for%20Chrome&descAlignY=55&descSize=17" alt="SERP Capture" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/pablovivero/extension-seo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-0F766E?style=flat-square" alt="MIT license" /></a>
+  <img src="https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Manifest V3" />
+  <img src="https://img.shields.io/badge/privacy-local--first-2563EB?style=flat-square&logo=shield&logoColor=white" alt="Local-first privacy" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+</p>
+
+<p align="center">
+  <a href="#install">Install</a> &bull; <a href="#how-it-works">How it works</a> &bull; <a href="#stack">Stack</a> &bull; <a href="#optional-local-receiver">Local receiver</a> &bull; <a href="#contributing">Contributing</a>
+</p>
+
+> A Chrome extension for capturing the organic Google results you can already see, turning them into structured JSON, and keeping the whole workflow under your control.
+
 # SERP Capture Extension
 
 SERP Capture is a Chrome Manifest V3 extension that captures visible organic Google Search results for a list of keywords and exports a structured JSON file.
 
 It is designed for local, user-controlled SEO workflows: the extension opens Google in a visible browser tab, reads the loaded results page, and stores the capture locally. It does not use a remote backend, scraping proxy, analytics service, or third-party scraping API.
+
+## How It Works
+
+```mermaid
+flowchart LR
+    A["Keywords\nfrom the popup"] --> B["Visible Google\nsearch tab"]
+    B --> C["Organic-result\nextractor"]
+    C --> D["Structured JSON\ncapture"]
+    D --> E["Download locally"]
+    D -. optional .-> F["Local receiver\n127.0.0.1"]
+
+    classDef primary fill:#0F766E,color:#FFFFFF,stroke:#0F766E
+    classDef secondary fill:#DBEAFE,color:#1E3A8A,stroke:#2563EB
+    classDef local fill:#ECFDF5,color:#065F46,stroke:#10B981
+    class A,B,C primary
+    class D,E secondary
+    class F local
+```
+
+The extension processes one keyword at a time in a temporary, visible Google tab. It captures valid organic results, assigns consecutive positions, exports the data, and then closes the tab.
+
+## Stack
+
+<p>
+  <img src="https://img.shields.io/badge/Chrome_Extensions-Manifest_V3-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Chrome Extensions Manifest V3" />
+  <img src="https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Vite-build%20tool-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/Vitest-tests-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest" />
+</p>
 
 ## Features
 
